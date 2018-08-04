@@ -32,6 +32,7 @@ type Light struct {
 	Name             string  `json:"name"`
 	ModelID          string  `json:"modelid"`
 	ManufacturerName string  `json:"manufacturername"`
+	ProductName      string  `json:"productname"`
 	UniqueID         string  `json:"uniqueid"`
 	SWVersion        string  `json:"swversion"`
 	Index            int     // Set by index of light array response

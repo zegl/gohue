@@ -10,7 +10,9 @@ package hue
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strconv"
 )
 
 // Action struct defines the state of a group
@@ -20,40 +22,55 @@ type Action struct {
 	Colormode string    `json:"colormode,omitempty"`
 	Ct        int       `json:"ct,omitempty"`
 	Effect    string    `json:"effect,omitempty"`
-	Hue       *int      `json:"hue,omitempty"`
-	On        *bool     `json:"on,omitempty"`
-	Sat       *int      `json:"sat,omitempty"`
+	Hue       int       `json:"hue,omitempty"`
+	On        bool      `json:"on,omitempty"`
+	Sat       int       `json:"sat,omitempty"`
 	XY        []float64 `json:"xy,omitempty"`
 	Scene     string    `json:"scene,omitempty"`
 }
 
 // Group struct defines the attributes for a group of lights.
 type Group struct {
-	Action Action   `json:"action"`
-	Lights []string `json:"lights"`
-	Name   string   `json:"name"`
-	Type   string   `json:"type"`
+	Action Action `json:"action"`
+	State  struct {
+		AllOn bool `json:"all_on"`
+		AnyOn bool `json:"any_on"`
+	} `json:"state"`
+
+	Recycle bool     `json:"recycle"`
+	Class   string   `json:"class"`
+	Lights  []string `json:"lights"`
+	Name    string   `json:"name"`
+	Type    string   `json:"type"`
+	Bridge  *Bridge
+	Index   int
 }
 
-// GetGroups gets the attributes for each group of lights.
-// TODO: NOT TESTED, NOT FULLY IMPLEMENTED
-func (bridge *Bridge) GetGroups() ([]Group, error) {
+// GetAllGroups gets the attributes for each group of lights.
+func (bridge *Bridge) GetAllGroups() ([]Group, error) {
 	uri := fmt.Sprintf("/api/%s/groups", bridge.Username)
 	body, _, err := bridge.Get(uri)
 	if err != nil {
 		return []Group{}, err
 	}
 
-	//fmt.Println("GROUP GET: ", string(body))
-
-	groups := map[string]Group{}
-	err = json.Unmarshal(body, &groups)
+	groupList := map[string]Group{}
+	err = json.Unmarshal(body, &groupList)
 	if err != nil {
 		return []Group{}, err
 	}
-	//fmt.Println("GROUPS: ", groups)
 
-	return []Group{}, nil
+	// Parse the index, add the sensor to the list, and return the array
+	groups := make([]Group, 0, len(groupList))
+	for index, group := range groupList {
+		group.Index, err = strconv.Atoi(index)
+		if err != nil {
+			return []Group{}, errors.New("Unable to convert group index to integer. ")
+		}
+		group.Bridge = bridge
+		groups = append(groups, group)
+	}
+	return groups, nil
 }
 
 // SetGroupState sends an action to group
