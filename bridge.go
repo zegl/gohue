@@ -68,7 +68,11 @@ func (bridge *Bridge) Get(path string) ([]byte, io.Reader, error) {
 	if err != nil {
 		return []byte{}, nil, fmt.Errorf("unable to access bridge: %w", err)
 	}
-	return HandleResponse(resp)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return []byte{}, nil, fmt.Errorf("unable to read response body: %w", err)
+	}
+	return body, bytes.NewReader(body), nil
 }
 
 // Put sends a http PUT to the bridge with
