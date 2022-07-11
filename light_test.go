@@ -8,14 +8,13 @@
 package hue
 
 import (
-	"github.com/collinux/gohue"
 	"testing"
 	"time"
 	"os"
 )
 
 func TestSetLightState(t *testing.T) {
-	bridges, err := hue.FindBridges()
+	bridges, err := FindBridges()
 	if err != nil {
 		t.Fatal(err)
 	}

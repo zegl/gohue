@@ -8,13 +8,12 @@
 package hue
 
 import (
-	"github.com/collinux/gohue"
 	"testing"
 	"os"
 )
 
 func TestGetAllScenes(t *testing.T) {
-	bridges, err := hue.FindBridges()
+	bridges, err := FindBridges()
 	if err != nil {
 		t.Fatal(err)
 	}

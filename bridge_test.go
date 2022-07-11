@@ -8,13 +8,12 @@
 package hue
 
 import (
-	"github.com/collinux/gohue"
 	"testing"
 	"os"
 )
 
 func TestCreateUser(t *testing.T) {
-	bridges, err := hue.FindBridges()
+	bridges, err := FindBridges()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,7 +24,7 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestFindBridges(t *testing.T) {
-	bridges, err := hue.FindBridges()
+	bridges, err := FindBridges()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,7 +32,7 @@ func TestFindBridges(t *testing.T) {
 }
 
 func TestBridgeLogin(t *testing.T) {
-	bridges, err := hue.FindBridges()
+	bridges, err := FindBridges()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,5 +40,4 @@ func TestBridgeLogin(t *testing.T) {
 		t.Fatal("The environment variable HUE_USER_TOKEN must be set to the value from bridge.CreateUser")
 	}
 	bridges[0].Login(os.Getenv("HUE_USER_TOKEN"))
-
 }
