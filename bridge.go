@@ -13,6 +13,7 @@ package hue
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
@@ -52,11 +53,28 @@ type BridgeInfo struct {
 }
 
 func (b *Bridge) newClient() *http.Client {
-	return &http.Client{Timeout: time.Second * 5}
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		// DialContext: http.Dial
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+
+	return &http.Client{
+		Transport: transport,
+		Timeout:   time.Second * 5,
+	}
 }
 
 func (b *Bridge) uri(path string) string {
-	return fmt.Sprintf("http://%s%s", b.IPAddress, path)
+	return fmt.Sprintf("https://%s%s", b.IPAddress, path)
 }
 
 // Get sends a http GET to the bridge
