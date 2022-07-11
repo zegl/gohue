@@ -50,10 +50,10 @@ type BridgeInfo struct {
 	} `xml:"device"`
 }
 
-// Get sends an http GET to the bridge
+// Get sends a http GET to the bridge
 func (bridge *Bridge) Get(path string) ([]byte, io.Reader, error) {
 	uri := fmt.Sprintf("http://" + bridge.IPAddress + path)
-	client := &http.Client{Timeout: time.Second * 5}
+	client := &http.Client{Timeout: time.Minute}
 	resp, err := client.Get(uri)
 
 	if err != nil {
@@ -62,11 +62,11 @@ func (bridge *Bridge) Get(path string) ([]byte, io.Reader, error) {
 	return HandleResponse(resp)
 }
 
-// Put sends an http PUT to the bridge with
+// Put sends a http PUT to the bridge with
 // a body formatted with parameters (in a generic interface)
 func (bridge *Bridge) Put(path string, params interface{}) ([]byte, io.Reader, error) {
 	uri := fmt.Sprintf("http://" + bridge.IPAddress + path)
-	client := &http.Client{Timeout: time.Second * 5}
+	client := &http.Client{Timeout: time.Minute}
 
 	data, err := json.Marshal(params)
 	if err != nil {
@@ -81,7 +81,7 @@ func (bridge *Bridge) Put(path string, params interface{}) ([]byte, io.Reader, e
 	return HandleResponse(resp)
 }
 
-// Post sends an http POST to the bridge with
+// Post sends a http POST to the bridge with
 // a body formatted with parameters (in a generic interface).
 // If `params` is nil then it will send an empty body with the post request.
 func (bridge *Bridge) Post(path string, params interface{}) ([]byte, io.Reader, error) {
@@ -97,7 +97,7 @@ func (bridge *Bridge) Post(path string, params interface{}) ([]byte, io.Reader, 
 
 	// Send the request and handle the response
 	uri := fmt.Sprintf("http://" + bridge.IPAddress + path)
-	client := &http.Client{Timeout: time.Second * 5}
+	client := &http.Client{Timeout: time.Minute}
 	resp, err := client.Post(uri, "text/json", bytes.NewReader(request))
 
 	if err != nil {
@@ -106,10 +106,10 @@ func (bridge *Bridge) Post(path string, params interface{}) ([]byte, io.Reader, 
 	return HandleResponse(resp)
 }
 
-// Delete sends an http DELETE to the bridge
+// Delete sends a http DELETE to the bridge
 func (bridge *Bridge) Delete(path string) error {
 	uri := fmt.Sprintf("http://" + bridge.IPAddress + path)
-	client := &http.Client{Timeout: time.Second * 5}
+	client := &http.Client{Timeout: time.Minute}
 	req, _ := http.NewRequest("DELETE", uri, nil)
 	resp, err := client.Do(req)
 

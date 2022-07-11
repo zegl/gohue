@@ -8,9 +8,9 @@
 package hue
 
 import (
+	"os"
 	"testing"
 	"time"
-	"os"
 )
 
 func TestSetLightState(t *testing.T) {
@@ -64,7 +64,7 @@ func TestSetLightState(t *testing.T) {
 }
 
 func TestFindNewLights(t *testing.T) {
-	bridges, err := hue.FindBridges()
+	bridges, err := FindBridges()
 	if err != nil {
 		t.Fatal(err)
 	}
