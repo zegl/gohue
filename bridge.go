@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -52,10 +53,9 @@ type BridgeInfo struct {
 
 // Get sends a http GET to the bridge
 func (bridge *Bridge) Get(path string) ([]byte, io.Reader, error) {
-	uri := fmt.Sprintf("http://" + bridge.IPAddress + path)
-	client := &http.Client{Timeout: time.Minute}
-	resp, err := client.Get(uri)
-
+	uri := fmt.Sprintf("http://%s%s", bridge.IPAddress, path)
+	log.Println("GET", uri)
+	resp, err := http.Get(uri)
 	if err != nil {
 		return []byte{}, nil, fmt.Errorf("unable to access bridge: %w", err)
 	}
