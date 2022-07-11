@@ -146,7 +146,9 @@ func (bridge *Bridge) Delete(path string) error {
 // bridge Get/Put/Post/Delete by checking it for errors
 // and invalid return types.
 func HandleResponse(resp *http.Response) ([]byte, io.Reader, error) {
-	log.Printf("code", resp.StatusCode)
+	log.Printf("code: %d", resp.StatusCode)
+	log.Printf("headers: %+v", resp.Header)
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return []byte{}, nil, fmt.Errorf("unable to read response: %w", err)
@@ -160,6 +162,7 @@ func HandleResponse(resp *http.Response) ([]byte, io.Reader, error) {
 		errDesc := errString[strings.Index(errString, "description\":\"")+14 : strings.Index(errString, "\"}}")]
 		return []byte{}, nil, fmt.Errorf("failed to handle response: error type %s: %s", errNum, errDesc)
 	}
+
 	return body, reader, nil
 }
 
