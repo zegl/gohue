@@ -10,7 +10,6 @@ package hue
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strconv"
 )
@@ -65,7 +64,7 @@ func (bridge *Bridge) GetAllGroups() ([]Group, error) {
 	for index, group := range groupList {
 		group.Index, err = strconv.Atoi(index)
 		if err != nil {
-			return []Group{}, errors.New("Unable to convert group index to integer. ")
+			return []Group{}, fmt.Errorf("unable to convert group index to integer: %w", err)
 		}
 		group.Bridge = bridge
 		groups = append(groups, group)

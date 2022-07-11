@@ -47,7 +47,8 @@ func (bridge *Bridge) GetAllSchedules() ([]Schedule, error) {
 	if err != nil {
 		return []Schedule{}, err
 	}
-	scheduleList := []Schedule{}
+
+	var scheduleList []Schedule
 	for key, value := range schedules {
 		schedule := Schedule{}
 		schedule = value
@@ -72,6 +73,7 @@ func (bridge *Bridge) GetSchedule(id string) (Schedule, error) {
 	if err != nil {
 		return Schedule{}, err
 	}
+
 	return schedule, nil
 }
 

@@ -209,11 +209,11 @@ func (light *Light) Dim(percent int) error {
 		}
 		return nil
 	}
-	return errors.New("Light.Dim percentage given is not between 1 and 100. ")
+	return errors.New("light.Dim percentage given is not between 1 and 100")
 }
 
 // SetBrightness sets the brightness to a percentage of the maximum
-// maximum brightness as an integer (`LightStruct.Bri between 1 and 254 inclusive`)
+//  brightness as an integer (`LightStruct.Bri between 1 and 254 inclusive`)
 func (light *Light) SetBrightness(percent int) error {
 	if percent > 0 && percent <= 100 {
 		brightness := uint8(float32(percent) * 2.54) // 100=254x --> 2.54
@@ -224,15 +224,15 @@ func (light *Light) SetBrightness(percent int) error {
 		}
 		return nil
 	}
-	return errors.New("Light.SetBrightness percentage is not between 1 and 100. ")
+	return errors.New("light.SetBrightness percentage is not between 1 and 100")
 }
 
 // Brighten will increase LightStruct.Bri by a given percent (integer)
 func (light *Light) Brighten(percent int) error {
 	if percent > 0 && percent <= 100 {
 		originalBri := light.State.Bri
-		increaseBri := float32(originalBri) * float32((float32(percent) / 100.0))
-		newBri := uint8(originalBri + uint8(increaseBri))
+		increaseBri := float32(originalBri) * (float32(percent) / 100.0)
+		newBri := originalBri + uint8(increaseBri)
 		if newBri > 254 { // LightState.Bri must be between 1 and 254 inclusive
 			newBri = 254
 		}
@@ -243,7 +243,7 @@ func (light *Light) Brighten(percent int) error {
 		}
 		return nil
 	}
-	return errors.New("Light.Brighten percentage is not between 1 and 100. ")
+	return errors.New("Light.Brighten percentage is not between 1 and 100")
 }
 
 // SetState modifyies light attributes. See `LightState` struct for attributes.

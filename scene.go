@@ -10,7 +10,6 @@ package hue
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 )
 
@@ -44,7 +43,7 @@ func (bridge *Bridge) GetAllScenes() ([]Scene, error) {
 	if err != nil {
 		return []Scene{}, err
 	}
-	scenesList := []Scene{}
+	var scenesList []Scene
 	for key, value := range scenes {
 		scene := Scene{}
 		scene = value
@@ -84,8 +83,7 @@ func (bridge *Bridge) GetSceneByName(name string) (Scene, error) {
 		}
 	}
 
-	errOut := fmt.Sprintf("Error: Scene name '%s' not found. ", name)
-	return Scene{}, errors.New(errOut)
+	return Scene{}, fmt.Errorf("scene name '%s' not found", name)
 }
 
 // RecallScene recalls a scene
