@@ -51,11 +51,20 @@ type BridgeInfo struct {
 	} `xml:"device"`
 }
 
+func (b *Bridge) newClient() *http.Client {
+	return &http.Client{Timeout: time.Second * 5}
+}
+
+func (b *Bridge) uri(path string) string {
+	return fmt.Sprintf("http://%s%s", b.IPAddress, path)
+}
+
 // Get sends a http GET to the bridge
 func (bridge *Bridge) Get(path string) ([]byte, io.Reader, error) {
-	uri := fmt.Sprintf("http://%s%s", bridge.IPAddress, path)
-	log.Println("GET", uri)
-	resp, err := http.Get(uri)
+	uri := bridge.uri(path)
+	log.Println("GET:", uri)
+	client := bridge.newClient()
+	resp, err := client.Get(uri)
 	if err != nil {
 		return []byte{}, nil, fmt.Errorf("unable to access bridge: %w", err)
 	}
@@ -65,15 +74,19 @@ func (bridge *Bridge) Get(path string) ([]byte, io.Reader, error) {
 // Put sends a http PUT to the bridge with
 // a body formatted with parameters (in a generic interface)
 func (bridge *Bridge) Put(path string, params interface{}) ([]byte, io.Reader, error) {
-	uri := fmt.Sprintf("http://" + bridge.IPAddress + path)
-	client := &http.Client{Timeout: time.Minute}
-
+	uri := bridge.uri(path)
+	log.Println("PUT:", uri)
 	data, err := json.Marshal(params)
 	if err != nil {
 		return []byte{}, nil, fmt.Errorf("unable to marshal PUT request interface: %w", err)
 	}
 
-	request, _ := http.NewRequest("PUT", uri, bytes.NewReader(data))
+	request, err := http.NewRequest("PUT", uri, bytes.NewReader(data))
+	if err != nil {
+		return []byte{}, nil, fmt.Errorf("unable to create PUT request: %w", err)
+	}
+
+	client := bridge.newClient()
 	resp, err := client.Do(request)
 	if err != nil {
 		return []byte{}, nil, fmt.Errorf("unable to access bridge: %w", err)
@@ -86,7 +99,7 @@ func (bridge *Bridge) Put(path string, params interface{}) ([]byte, io.Reader, e
 // If `params` is nil then it will send an empty body with the post request.
 func (bridge *Bridge) Post(path string, params interface{}) ([]byte, io.Reader, error) {
 	// Add the params to the request or allow an empty body
-	request := []byte{}
+	var request []byte
 	if params != nil {
 		reqBody, err := json.Marshal(params)
 		if err != nil {
@@ -96,28 +109,37 @@ func (bridge *Bridge) Post(path string, params interface{}) ([]byte, io.Reader, 
 	}
 
 	// Send the request and handle the response
-	uri := fmt.Sprintf("http://" + bridge.IPAddress + path)
-	client := &http.Client{Timeout: time.Minute}
+	uri := bridge.uri(path)
+	log.Println("POST:", uri)
+	client := bridge.newClient()
 	resp, err := client.Post(uri, "text/json", bytes.NewReader(request))
-
 	if err != nil {
 		return []byte{}, nil, fmt.Errorf("unable to access bridge: %w", err)
 	}
+
 	return HandleResponse(resp)
 }
 
 // Delete sends a http DELETE to the bridge
 func (bridge *Bridge) Delete(path string) error {
-	uri := fmt.Sprintf("http://" + bridge.IPAddress + path)
-	client := &http.Client{Timeout: time.Minute}
-	req, _ := http.NewRequest("DELETE", uri, nil)
-	resp, err := client.Do(req)
+	uri := bridge.uri(path)
+	req, err := http.NewRequest("DELETE", uri, nil)
+	if err != nil {
+		return fmt.Errorf("unable to create DELETE request: %w", err)
+	}
 
+	client := bridge.newClient()
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("unable to access bridge: %w", err)
 	}
+
 	_, _, err = HandleResponse(resp)
-	return err
+	if err != nil {
+		return fmt.Errorf("unable to access bridge: %w", err)
+	}
+
+	return nil
 }
 
 // HandleResponse manages the http.Response content from a
@@ -126,7 +148,7 @@ func (bridge *Bridge) Delete(path string) error {
 func HandleResponse(resp *http.Response) ([]byte, io.Reader, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return []byte{}, nil, fmt.Errorf("unable to read bridge description xml: %w", err)
+		return []byte{}, nil, fmt.Errorf("unable to read response: %w", err)
 	}
 	defer resp.Body.Close()
 
