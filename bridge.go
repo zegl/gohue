@@ -214,6 +214,8 @@ func (bridge *Bridge) GetInfo() error {
 	}
 
 	bridge.Info = data
+	log.Printf("Connected to bridge: %+v\n", bridge.Info)
+
 	return nil
 }
 
